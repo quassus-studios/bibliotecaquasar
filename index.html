@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUASSUS SMP — Biblioteca</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red: #c0151a;
+  --red-bright: #ff2a30;
+  --red-glow: rgba(192,21,26,0.5);
+  --gold: #d4a017;
+  --gold-light: #f0c040;
+  --cream: #f5ead8;
+  --wood-dark: #2e1a0a;
+  --wood-mid: #4a2e12;
+  --wood-light: #7a4e22;
+  --wood-shine: #c07038;
+  --space-deep: #00000f;
+}
+
+html, body {
+  min-height: 100vh;
+  font-family: 'EB Garamond', serif;
+  background: var(--space-deep);
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ── SPACE BACKGROUND ── */
+#space-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── LAYOUT ── */
+.page-wrap {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOP BAR ── */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.top-bar-left { display: flex; align-items: center; gap: 0.8rem; }
+.top-bar-right { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+
+/* Language selector */
+.lang-btn {
+  background: rgba(192,21,26,0.15);
+  border: 1px solid rgba(192,21,26,0.4);
+  color: #e8c8c8;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.75rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lang-btn:hover, .lang-btn.active {
+  background: rgba(192,21,26,0.5);
+  border-color: var(--red-bright);
+  color: #fff;
+  box-shadow: 0 0 10px var(--red-glow);
+}
+
+/* Website button */
+.website-btn {
+  background: linear-gradient(135deg, #8a0e12 0%, #c0151a 50%, #8a0e12 100%);
+  border: 1px solid var(--red-bright);
+  color: #fff;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  padding: 0.45rem 1.1rem;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+  box-shadow: 0 0 14px rgba(192,21,26,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  white-space: nowrap;
+}
+.website-btn:hover {
+  background: linear-gradient(135deg, #c0151a 0%, #ff2a30 50%, #c0151a 100%);
+  box-shadow: 0 0 24px var(--red-glow), 0 0 8px rgba(255,80,80,0.3);
+  transform: translateY(-1px);
+}
+
+/* ── HEADER ── */
+.header-section {
+  text-align: center;
+  padding: 0.5rem 2rem 2rem;
+  position: relative;
+}
+
+.title-glow-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.main-title {
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: clamp(2.2rem, 6vw, 4.2rem);
+  font-weight: 900;
+  background: linear-gradient(180deg,
+    #ffffff 0%,
+    #ff9090 30%,
+    #ff2a30 55%,
+    #c0151a 75%,
+    #8a0a0e 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(255,50,50,0.6)) drop-shadow(0 0 40px rgba(192,21,26,0.4));
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Red stripe under title */
+.title-stripe {
+  height: 3px;
+  margin: 0.5rem auto 0;
+  width: 80%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--red) 15%,
+    var(--red-bright) 40%,
+    #fff 50%,
+    var(--red-bright) 60%,
+    var(--red) 85%,
+    transparent 100%
+  );
+  box-shadow: 0 0 12px rgba(255,50,50,0.7), 0 0 4px rgba(255,200,200,0.4);
+  border-radius: 2px;
+}
+
+.subtitle-text {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(0.9rem, 2vw, 1.15rem);
+  color: rgba(220,185,185,0.85);
+  max-width: 680px;
+  margin: 1.2rem auto 0;
+  line-height: 1.75;
+  font-style: italic;
+}
+
+/* ── BOOKCASE SECTION ── */
+.bookcase-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 1rem 2rem;
+}
+
+.shelf-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 900px;
+}
+
+.nav-arrow {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.nav-arrow:hover { transform: scale(1.1); }
+.nav-arrow:hover .arrow-svg { filter: drop-shadow(0 0 8px var(--red-glow)); }
+
+.arrow-svg {
+  width: 40px;
+  height: 60px;
+  transition: filter 0.2s;
+}
+
+.nav-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  color: rgba(200,150,150,0.6);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── BOOKCASE ── */
+.bookcase-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 800px;
+  width: 100%;
+}
+
+.bookcase-crown {
+  height: 32px;
+  background: linear-gradient(180deg,
+    #1a0808 0%,
+    var(--wood-dark) 30%,
+    var(--wood-shine) 60%,
+    var(--wood-mid) 80%,
+    var(--wood-dark) 100%
+  );
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.8), inset 0 2px 4px rgba(200,130,50,0.15);
+}
+
+.bookcase-crown::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 5px;
+  background: linear-gradient(90deg,
+    var(--wood-dark),
+    var(--wood-shine) 25%,
+    var(--wood-mid) 50%,
+    var(--wood-shine) 75%,
+    var(--wood-dark)
+  );
+}
+
+/* Carved QSMP ornament on crown */
+.crown-ornament {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.4em;
+  color: rgba(200,150,50,0.5);
+  white-space: nowrap;
+}
+
+.bookcase-body {
+  background: linear-gradient(90deg,
+    var(--wood-dark) 0%,
+    var(--wood-mid) 2%,
+    var(--wood-light) 3.5%,
+    var(--wood-mid) 6%,
+    var(--wood-mid) 94%,
+    var(--wood-light) 96.5%,
+    var(--wood-mid) 98%,
+    var(--wood-dark) 100%
+  );
+  padding: 0 20px;
+  box-shadow:
+    -8px 0 24px rgba(0,0,0,0.8),
+    8px 0 24px rgba(0,0,0,0.8),
+    inset 4px 0 8px rgba(200,140,50,0.08),
+    inset -4px 0 8px rgba(200,140,50,0.08);
+}
+
+.shelf-inner {
+  background: radial-gradient(ellipse at 50% 30%, rgba(20,8,3,0.7) 0%, rgba(5,2,0,0.9) 100%);
+  padding: 18px 10px 0;
+  min-height: 240px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* STACKED BOOKS (horizontal) */
+.books-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-bottom: 8px;
+  padding-left: 20px;
+}
+
+/* Single book lying flat */
+.book-flat {
+  display: flex;
+  align-items: stretch;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), filter 0.25s;
+  transform-origin: left center;
+}
+
+.book-flat:hover {
+  transform: translateX(18px) scale(1.03);
+  filter: brightness(1.25);
+  z-index: 5;
+}
+
+/* Book cover (left face when lying down) */
+.book-cover-face {
+  width: 50px;
+  border-radius: 3px 3px 3px 3px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 40%);
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: -3px 0 6px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+.book-cover-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, transparent 40%);
+}
+
+/* Book spine (the long rectangle) */
+.book-spine-flat {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 3px 3px 0;
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,0.08),
+    inset 0 -2px 4px rgba(0,0,0,0.4),
+    2px 0 8px rgba(0,0,0,0.5);
+}
+
+.book-spine-flat::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px
+  );
+}
+
+.book-spine-flat::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  height: 40%;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.book-text-flat {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 16px;
+  gap: 3px;
+}
+
+.book-title-flat {
+  font-family: 'Cinzel', serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+}
+
+.book-author-flat {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 10px;
+  opacity: 0.75;
+  letter-spacing: 0.02em;
+}
+
+.book-line-h {
+  position: absolute;
+  right: 0; left: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+/* Shelf plank */
+.shelf-plank {
+  height: 24px;
+  background: linear-gradient(180deg,
+    var(--wood-shine) 0%,
+    var(--wood-light) 35%,
+    var(--wood-mid) 65%,
+    var(--wood-dark) 100%
+  );
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,200,100,0.2);
+}
+
+.shelf-plank::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.3) 0%,
+    rgba(255,200,100,0.4) 30%,
+    rgba(255,220,130,0.6) 50%,
+    rgba(255,200,100,0.4) 70%,
+    rgba(0,0,0,0.3) 100%
+  );
+}
+
+/* empty shelf message */
+.empty-shelf {
+  text-align: center;
+  padding: 40px 20px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  color: rgba(180,130,100,0.5);
+  font-size: 1rem;
+}
+
+.bookcase-base {
+  height: 28px;
+  background: linear-gradient(180deg,
+    var(--wood-dark) 0%,
+    var(--wood-mid) 40%,
+    var(--wood-dark) 100%
+  );
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 2px 4px rgba(200,130,50,0.1);
+  position: relative;
+}
+
+.bookcase-base::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--wood-shine), transparent);
+}
+
+/* shelf number indicator */
+.shelf-indicator {
+  margin-top: 0.8rem;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: rgba(200,150,100,0.4);
+  text-transform: uppercase;
+}
+
+/* ── FOOTER ── */
+.site-footer {
+  text-align: center;
+  padding: 1.5rem 2rem 2.5rem;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: rgba(200,160,160,0.45);
+  letter-spacing: 0.05em;
+}
+
+.footer-divider {
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(192,21,26,0.4), transparent);
+  margin: 0 auto 1rem;
+}
+
+/* ── MODAL / BOOK READER ── */
+.reader-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.94);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  padding: 1rem;
+}
+.reader-overlay.open { display: flex; }
+
+/* The open book wrapper */
+.open-book {
+  display: flex;
+  align-items: stretch;
+  width: min(960px, 96vw);
+  max-height: 88vh;
+  position: relative;
+  filter: drop-shadow(0 30px 60px rgba(0,0,0,0.95)) drop-shadow(0 0 40px rgba(192,21,26,0.15));
+}
+
+/* Cover peek on far left */
+.book-cover-peek {
+  width: 28px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #0d0508 0%, #1a0a12 60%, #2a1020 100%);
+  border-radius: 5px 0 0 5px;
+  position: relative;
+  box-shadow: -4px 0 12px rgba(0,0,0,0.8);
+}
+.book-cover-peek::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 4px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(192,21,26,0.25));
+}
+
+/* Left page */
+.book-page-left {
+  flex: 1;
+  min-width: 0;
+  background:
+    radial-gradient(ellipse at 8% 50%, rgba(200,180,140,0.06) 0%, transparent 60%),
+    linear-gradient(90deg, #f2e8d5 0%, #f8f0e0 60%, #ede3cb 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Left page inner shadow (spine side) */
+.book-page-left::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 30px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06));
+  pointer-events: none;
+}
+/* Left page outer shadow (cover side) */
+.book-page-left::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 18px; height: 100%;
+  background: linear-gradient(90deg, rgba(0,0,0,0.12), transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Spine / binding */
+.book-spine-binding {
+  width: 32px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg,
+    #1a0808 0%,
+    #3a1010 15%,
+    #5a1818 30%,
+    #c0151a 50%,
+    #5a1818 70%,
+    #3a1010 85%,
+    #1a0808 100%
+  );
+  position: relative;
+  box-shadow:
+    -4px 0 12px rgba(0,0,0,0.5),
+    4px 0 12px rgba(0,0,0,0.5),
+    inset 0 0 8px rgba(0,0,0,0.4);
+  z-index: 3;
+}
+.book-spine-binding::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0px, transparent 10px,
+    rgba(255,255,255,0.04) 10px, rgba(255,255,255,0.04) 11px
+  );
+}
+
+/* Right page */
+.book-page-right {
+  flex: 1;
+  min-width: 0;
+  background:
+    radial-gradient(ellipse at 92% 50%, rgba(200,180,140,0.06) 0%, transparent 60%),
+    linear-gradient(90deg, #ede3cb 0%, #f8f0e0 40%, #f2e8d5 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.book-page-right::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 30px; height: 100%;
+  background: linear-gradient(90deg, rgba(0,0,0,0.06), transparent);
+  pointer-events: none;
+}
+.book-page-right::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 18px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.10));
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Back cover peek */
+.book-backcover-peek {
+  width: 28px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #2a1020 0%, #1a0a12 40%, #0d0508 100%);
+  border-radius: 0 5px 5px 0;
+  box-shadow: 4px 0 12px rgba(0,0,0,0.8);
+  position: relative;
+}
+.book-backcover-peek::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: linear-gradient(90deg, rgba(192,21,26,0.2), transparent);
+}
+
+/* Page content area */
+.page-content {
+  flex: 1;
+  padding: 2.2rem 2.4rem 1.4rem;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+.page-content::-webkit-scrollbar { width: 3px; }
+.page-content::-webkit-scrollbar-thumb { background: rgba(150,100,60,0.3); }
+
+/* Paper line texture */
+.page-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 31px,
+    rgba(150,120,80,0.08) 31px,
+    rgba(150,120,80,0.08) 32px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Page header (title on left, chapter on right) */
+.page-running-header {
+  font-family: 'Cinzel', serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(100,60,30,0.45);
+  padding: 0.8rem 2.4rem 0;
+  text-align: center;
+  border-bottom: 1px solid rgba(150,100,60,0.15);
+  padding-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Page footer */
+.page-footer {
+  padding: 0.6rem 2.4rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(150,100,60,0.12);
+}
+
+.page-number {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: rgba(100,60,30,0.5);
+}
+
+.page-turn-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(130,70,40,0.6);
+  font-size: 1.1rem;
+  transition: color 0.2s, transform 0.2s;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  line-height: 1;
+}
+.page-turn-btn:hover:not(:disabled) {
+  color: rgba(192,21,26,0.9);
+  transform: scale(1.15);
+}
+.page-turn-btn:disabled { opacity: 0.15; cursor: default; }
+
+/* Book title page (first spread) */
+.title-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.title-page-ornament {
+  font-size: 1.2rem;
+  color: rgba(130,80,30,0.4);
+  letter-spacing: 0.4em;
+  margin-bottom: 1.2rem;
+}
+
+.title-page-title {
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  color: #3a1a08;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+}
+
+.title-page-rule {
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(130,80,30,0.5), transparent);
+  margin: 1rem auto;
+}
+
+.title-page-author {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: rgba(80,40,20,0.65);
+}
+
+.title-page-date {
+  margin-top: 2rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: rgba(100,60,30,0.35);
+}
+
+/* Right (blank) page when on title spread */
+.blank-page-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  padding-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.blank-flourish {
+  font-size: 2rem;
+  color: rgba(130,80,30,0.12);
+}
+
+/* Main text */
+.page-body-text {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(0.95rem, 1.6vw, 1.08rem);
+  line-height: 1.95;
+  color: #2a1408;
+  text-align: justify;
+  text-indent: 2em;
+  position: relative;
+  z-index: 1;
+}
+
+/* Drop cap for first paragraph on left page */
+.drop-cap::first-letter {
+  float: left;
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: 3.2em;
+  line-height: 0.82;
+  margin-right: 0.05em;
+  margin-bottom: -0.05em;
+  color: var(--red);
+  text-shadow: 1px 1px 0 rgba(100,0,0,0.2);
+}
+
+/* Close button (floated above book) */
+.reader-close-btn {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1a0808;
+  border: 1px solid rgba(192,21,26,0.5);
+  color: rgba(255,160,160,0.8);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px rgba(192,21,26,0.3);
+  z-index: 10;
+  line-height: 1;
+}
+.reader-close-btn:hover {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 0 20px var(--red-glow);
+}
+
+/* Page flip animation */
+@keyframes fadeSlideOut {
+  0%   { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-12px); }
+}
+@keyframes fadeSlideIn {
+  0%   { opacity: 0; transform: translateX(12px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+.flip-out { animation: fadeSlideOut 0.18s ease-in forwards; }
+.flip-in  { animation: fadeSlideIn  0.2s  ease-out forwards; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(10,3,1,0.95);
+  border: 1px solid rgba(192,21,26,0.4);
+  color: rgba(240,200,180,0.9);
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  padding: 0.7rem 1.6rem;
+  border-radius: 4px;
+  box-shadow: 0 0 20px var(--red-glow);
+  opacity: 0;
+  transition: opacity 0.4s, transform 0.4s;
+  pointer-events: none;
+  z-index: 300;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Scrollbar */
+.reader-page::-webkit-scrollbar { width: 4px; }
+.reader-page::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+.reader-page::-webkit-scrollbar-thumb { background: rgba(192,21,26,0.4); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Space canvas -->
+<canvas id="space-canvas"></canvas>
+
+<div class="page-wrap">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div style="display:flex;gap:4px;">
+        <button class="lang-btn active" onclick="setLang('pt')" data-lang-label="pt">PT</button>
+        <button class="lang-btn" onclick="setLang('en')" data-lang-label="en">EN</button>
+        <button class="lang-btn" onclick="setLang('es')" data-lang-label="es">ES</button>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <a href="https://quassus-studios.github.io/quassus/" target="_blank" class="website-btn" data-i18n="websiteBtn">Quassus WEBSITE</a>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header-section">
+    <div class="title-glow-wrap">
+      <h1 class="main-title">QUASSUS — SMP</h1>
+      <div class="title-stripe"></div>
+    </div>
+    <p class="subtitle-text" data-i18n="subtitle">
+      Seja bem vindo a biblioteca oficial do QSMP (Quassus SMP). Aqui você vai encontrar toda a história do nosso querido servidor, nossa biblioteca é constantemente atualizada e sempre que sofrer uma atualização vamos avisar na área de News do site e em nosso Discord.
+    </p>
+  </header>
+
+  <!-- BOOKCASE -->
+  <section class="bookcase-section">
+    <div class="shelf-navigation">
+
+      <!-- Left arrow -->
+      <button class="nav-arrow" onclick="changeShelf(-1)" aria-label="Prateleira anterior">
+        <svg class="arrow-svg" viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ag1" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#ff2a30"/>
+              <stop offset="100%" stop-color="#8a0e12"/>
+            </linearGradient>
+          </defs>
+          <!-- Arrow shaft -->
+          <rect x="18" y="8" width="6" height="42" rx="2" fill="url(#ag1)" opacity="0.7"/>
+          <!-- Arrowhead pointing left -->
+          <polygon points="0,30 22,8 22,52" fill="url(#ag1)"/>
+          <!-- Inner highlight -->
+          <polygon points="4,30 20,12 20,48" fill="rgba(255,150,150,0.15)"/>
+          <!-- Rune decoration -->
+          <text x="20" y="32" text-anchor="middle" fill="rgba(255,200,200,0.4)" font-size="9" font-family="serif">◈</text>
+        </svg>
+        <span class="nav-label" data-i18n="prevShelf">Anterior</span>
+      </button>
+
+      <!-- Bookcase -->
+      <div class="bookcase-wrap">
+        <div class="bookcase-crown">
+          <div class="crown-ornament">✦ QUASSUS SMP — BIBLIOTECA ✦</div>
+        </div>
+        <div class="bookcase-body">
+          <div class="shelf-inner" id="shelf-content">
+            <!-- Populated by JS -->
+          </div>
+          <div class="shelf-plank"></div>
+        </div>
+        <div class="bookcase-base"></div>
+        <div class="shelf-indicator" id="shelf-indicator">— I —</div>
+      </div>
+
+      <!-- Right arrow -->
+      <button class="nav-arrow" onclick="changeShelf(1)" aria-label="Próxima prateleira">
+        <svg class="arrow-svg" viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ag2" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#8a0e12"/>
+              <stop offset="100%" stop-color="#ff2a30"/>
+            </linearGradient>
+          </defs>
+          <rect x="16" y="8" width="6" height="42" rx="2" fill="url(#ag2)" opacity="0.7"/>
+          <polygon points="40,30 18,8 18,52" fill="url(#ag2)"/>
+          <polygon points="36,30 20,12 20,48" fill="rgba(255,150,150,0.15)"/>
+          <text x="20" y="32" text-anchor="middle" fill="rgba(255,200,200,0.4)" font-size="9" font-family="serif">◈</text>
+        </svg>
+        <span class="nav-label" data-i18n="nextShelf">Próxima</span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-divider"></div>
+    <p data-i18n="footer">Livros novos ainda vão ser adicionados de acordo com o caminhar da história de nosso servidor.</p>
+  </footer>
+
+</div>
+
+<!-- READER MODAL -->
+<div class="reader-overlay" id="reader">
+  <div class="open-book" id="open-book">
+    <button class="reader-close-btn" onclick="closeReader()" title="Fechar">✕</button>
+
+    <!-- Cover peek left -->
+    <div class="book-cover-peek"></div>
+
+    <!-- LEFT PAGE -->
+    <div class="book-page-left" id="page-left">
+      <div class="page-running-header" id="running-left"></div>
+      <div class="page-content" id="content-left"></div>
+      <div class="page-footer">
+        <button class="page-turn-btn" id="btn-prev" onclick="turnPage(-1)" title="Página anterior">❮</button>
+        <div class="page-number" id="pnum-left"></div>
+        <div></div>
+      </div>
+    </div>
+
+    <!-- Spine -->
+    <div class="book-spine-binding"></div>
+
+    <!-- RIGHT PAGE -->
+    <div class="book-page-right" id="page-right">
+      <div class="page-running-header" id="running-right"></div>
+      <div class="page-content" id="content-right"></div>
+      <div class="page-footer">
+        <div></div>
+        <div class="page-number" id="pnum-right"></div>
+        <button class="page-turn-btn" id="btn-next" onclick="turnPage(1)" title="Próxima página">❯</button>
+      </div>
+    </div>
+
+    <!-- Back cover peek -->
+    <div class="book-backcover-peek"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════
+   TRANSLATIONS
+════════════════════════════════════════════ */
+const i18n = {
+  pt: {
+    websiteBtn: "Quassus WEBSITE",
+    subtitle: "Seja bem vindo a biblioteca oficial do QSMP (Quassus SMP). Aqui você vai encontrar toda a história do nosso querido servidor, nossa biblioteca é constantemente atualizada e sempre que sofrer uma atualização vamos avisar na área de News do site e em nosso Discord.",
+    prevShelf: "Anterior",
+    nextShelf: "Próxima",
+    footer: "Livros novos ainda vão ser adicionados de acordo com o caminhar da história de nosso servidor.",
+    prevPage: "◂ Anterior",
+    nextPage: "Próxima ▸",
+    noMoreBooks: "Ainda não temos mais livros por aqui... A história continua sendo escrita.",
+    pageOf: (c, t) => `Página ${c} / ${t}`,
+    emptyShelf: "Esta prateleira ainda está vazia...",
+    clickHint: "Clique no livro para abrir",
+  },
+  en: {
+    websiteBtn: "Quassus WEBSITE",
+    subtitle: "Welcome to the official QSMP (Quassus SMP) library. Here you will find the entire history of our beloved server. Our library is constantly updated, and whenever it receives an update, we will announce it in the News section of the site and in our Discord.",
+    prevShelf: "Previous",
+    nextShelf: "Next",
+    footer: "New books will be added as the story of our server unfolds.",
+    prevPage: "◂ Previous",
+    nextPage: "Next ▸",
+    noMoreBooks: "No more books here yet... The story is still being written.",
+    pageOf: (c, t) => `Page ${c} / ${t}`,
+    emptyShelf: "This shelf is still empty...",
+    clickHint: "Click the book to open",
+  },
+  es: {
+    websiteBtn: "Quassus WEBSITE",
+    subtitle: "Bienvenido a la biblioteca oficial del QSMP (Quassus SMP). Aquí encontrarás toda la historia de nuestro querido servidor. Nuestra biblioteca se actualiza constantemente y siempre que reciba una actualización lo anunciaremos en el área de Noticias del sitio y en nuestro Discord.",
+    prevShelf: "Anterior",
+    nextShelf: "Siguiente",
+    footer: "Se añadirán nuevos libros a medida que avance la historia de nuestro servidor.",
+    prevPage: "◂ Anterior",
+    nextPage: "Siguiente ▸",
+    noMoreBooks: "Aún no hay más libros aquí... La historia sigue siendo escrita.",
+    pageOf: (c, t) => `Página ${c} / ${t}`,
+    emptyShelf: "Esta estantería aún está vacía...",
+    clickHint: "Haz clic en el libro para abrirlo",
+  }
+};
+
+let currentLang = 'pt';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-lang-label') === lang);
+  });
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (i18n[lang][key]) el.textContent = i18n[lang][key];
+  });
+  renderShelf();
+  updatePageCounter();
+}
+
+/* ════════════════════════════════════════════
+   BOOK DATA
+════════════════════════════════════════════ */
+const shelves = [
+  // Shelf 1
+  [
+    {
+      title: { pt: "Começo da Jornada", en: "Beginning of the Journey", es: "Comienzo del Viaje" },
+      author: "??",
+      color: ["#1a0a30", "#2e1455", "#3a1a6a"],
+      textColor: "#d8c8ff",
+      height: 38,
+      pages: {
+        pt: [
+          `Em um mundo imperfeito um dia surgiu uma esperança, todos estavam ocupados demais brigando entre si, matando uns aos outros, roubando uns aos outros, um mundo injusto onde muitos sofriam...`,
+          `Mais e se alguém conseguisse mudar isso? Bom foi o que a Diretora Duck decidiu fazer, ela começou a fazer uma grande campanha e juntou diversos membros para seu grupo que ela chamou de V.A.L.O.R, juntos conseguiram chamar muita atenção e de repente todos falavam sobre.`,
+          `Um dia de repente Diretora Duck e seu grupo desaparecem, o mundo continua cheio de cartazes com convites para um mundo melhor feitos pela V.A.L.O.R, um número de contato é possível encontrar neles e aqueles que aceitam desaparecem....`,
+          `Seja bem vindo a Quasar....`,
+        ],
+        en: [
+          `In an imperfect world, hope once arose. Everyone was too busy fighting each other, killing one another, stealing from one another — an unjust world where many suffered...`,
+          `But what if someone could change that? That's what Director Duck decided to do. She launched a great campaign and gathered various members into a group she called V.A.L.O.R. Together they drew enormous attention, and suddenly everyone was talking about them.`,
+          `Then one day, Director Duck and her group vanished. The world remained covered in posters inviting people to a better world, made by V.A.L.O.R. A contact number could be found on them — and those who called... disappeared.`,
+          `Welcome to Quasar....`,
+        ],
+        es: [
+          `En un mundo imperfecto, un día surgió una esperanza. Todos estaban demasiado ocupados peleando entre sí, matándose unos a otros, robándose unos a otros — un mundo injusto donde muchos sufrían...`,
+          `¿Pero y si alguien pudiera cambiarlo? Eso fue lo que la Directora Duck decidió hacer. Lanzó una gran campaña y reunió a diversos miembros en un grupo que llamó V.A.L.O.R. Juntos lograron captar mucha atención y de repente todos hablaban de ellos.`,
+          `Un día, la Directora Duck y su grupo desaparecieron repentinamente. El mundo siguió lleno de carteles con invitaciones a un mundo mejor, hechos por V.A.L.O.R. En ellos se encontraba un número de contacto, y quienes lo llamaban... desaparecían.`,
+          `Bienvenido a Quasar....`,
+        ]
+      }
+    }
+  ]
+  // More shelves can be added here
+];
+
+/* ════════════════════════════════════════════
+   SHELF NAVIGATION
+════════════════════════════════════════════ */
+let currentShelf = 0;
+
+function changeShelf(dir) {
+  const next = currentShelf + dir;
+  if (next < 0) {
+    showToast(i18n[currentLang].noMoreBooks);
+    return;
+  }
+  if (next >= shelves.length) {
+    showToast(i18n[currentLang].noMoreBooks);
+    return;
+  }
+  currentShelf = next;
+  renderShelf();
+}
+
+function renderShelf() {
+  const container = document.getElementById('shelf-content');
+  container.innerHTML = '';
+
+  const shelfBooks = shelves[currentShelf];
+  const lang = currentLang;
+  const t = i18n[lang];
+
+  if (!shelfBooks || shelfBooks.length === 0) {
+    container.innerHTML = `<div class="empty-shelf">${t.emptyShelf}</div>`;
+    document.getElementById('shelf-indicator').textContent = `— ${toRoman(currentShelf + 1)} —`;
+    return;
+  }
+
+  const stack = document.createElement('div');
+  stack.className = 'books-stack';
+
+  shelfBooks.forEach(book => {
+    const bookEl = createFlatBook(book, lang);
+    stack.appendChild(bookEl);
+  });
+
+  container.appendChild(stack);
+
+  // Hint below
+  const hint = document.createElement('div');
+  hint.style.cssText = 'text-align:center;padding:10px 0 4px;font-family:EB Garamond,serif;font-style:italic;font-size:0.8rem;color:rgba(180,130,130,0.35);letter-spacing:0.08em;';
+  hint.textContent = t.clickHint;
+  container.appendChild(hint);
+
+  document.getElementById('shelf-indicator').textContent = `— ${toRoman(currentShelf + 1)} —`;
+}
+
+function createFlatBook(book, lang) {
+  const wrap = document.createElement('div');
+  wrap.className = 'book-flat';
+
+  const [c0, c1, c2] = book.color;
+
+  // Cover face (left side)
+  const cover = document.createElement('div');
+  cover.className = 'book-cover-face';
+  cover.style.cssText = `
+    background: linear-gradient(180deg, ${c0} 0%, ${c2} 100%);
+    width: 50px;
+    height: ${book.height}px;
+  `;
+  wrap.appendChild(cover);
+
+  // Pages edge
+  const pagesEdge = document.createElement('div');
+  pagesEdge.style.cssText = `
+    width: 8px;
+    height: ${book.height}px;
+    background: linear-gradient(90deg, #e8e0d0 0%, #f5f0e8 50%, #d8d0c0 100%);
+    flex-shrink: 0;
+  `;
+  wrap.appendChild(pagesEdge);
+
+  // Spine (long face)
+  const spine = document.createElement('div');
+  spine.className = 'book-spine-flat';
+  spine.style.cssText = `
+    height: ${book.height}px;
+    width: 380px;
+    background: linear-gradient(180deg, ${c2} 0%, ${c1} 40%, ${c0} 100%);
+  `;
+
+  // Lines top/bottom
+  [8, book.height - 8].forEach(top => {
+    const l = document.createElement('div');
+    l.className = 'book-line-h';
+    l.style.top = top + 'px';
+    spine.appendChild(l);
+  });
+
+  // Text
+  const textWrap = document.createElement('div');
+  textWrap.className = 'book-text-flat';
+  textWrap.style.paddingLeft = '20px';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'book-title-flat';
+  titleEl.style.color = book.textColor;
+  titleEl.textContent = typeof book.title === 'object' ? book.title[lang] : book.title;
+
+  const authorEl = document.createElement('div');
+  authorEl.className = 'book-author-flat';
+  authorEl.style.color = book.textColor;
+  authorEl.textContent = book.author;
+
+  textWrap.appendChild(titleEl);
+  textWrap.appendChild(authorEl);
+  spine.appendChild(textWrap);
+  wrap.appendChild(spine);
+
+  // Back cover
+  const backCover = document.createElement('div');
+  backCover.style.cssText = `
+    width: 22px;
+    height: ${book.height}px;
+    background: linear-gradient(90deg, ${c2} 0%, ${c0} 100%);
+    flex-shrink: 0;
+    border-radius: 0 3px 3px 0;
+    box-shadow: 3px 0 8px rgba(0,0,0,0.4);
+  `;
+  wrap.appendChild(backCover);
+
+  wrap.addEventListener('click', () => openReader(book, lang));
+  return wrap;
+}
+
+/* ════════════════════════════════════════════
+   BOOK READER — open book spread
+════════════════════════════════════════════ */
+let readerPages = [];   // array of paragraph strings
+let readerSpread = 0;   // 0 = title spread, 1+ = content spreads
+let readerBookData = null;
+
+// Each spread = { left: content|null, right: content|null }
+// spread 0 = title page (left) + blank (right)
+// spread 1+ = text pages, 2 per spread
+
+function openReader(book, lang) {
+  readerBookData = book;
+  const pages = book.pages[lang] || book.pages['pt'];
+  readerPages = pages;
+  readerSpread = 0;
+  renderSpread(false);
+  document.getElementById('reader').classList.add('open');
+}
+
+function renderSpread(animate) {
+  const book = readerBookData;
+  const lang = currentLang;
+  const title = typeof book.title === 'object' ? book.title[lang] : book.title;
+  const totalSpreads = 1 + Math.ceil(readerPages.length / 2); // 1 title + content spreads
+
+  const leftContent  = document.getElementById('content-left');
+  const rightContent = document.getElementById('content-right');
+  const runLeft      = document.getElementById('running-left');
+  const runRight     = document.getElementById('running-right');
+  const pnumLeft     = document.getElementById('pnum-left');
+  const pnumRight    = document.getElementById('pnum-right');
+
+  function doRender() {
+    if (readerSpread === 0) {
+      // Title spread
+      runLeft.textContent  = '';
+      runRight.textContent = '';
+      pnumLeft.textContent  = '';
+      pnumRight.textContent = '';
+
+      leftContent.innerHTML = `
+        <div class="title-page">
+          <div class="title-page-ornament">✦ ✦ ✦</div>
+          <div class="title-page-title">${title}</div>
+          <div class="title-page-rule"></div>
+          <div class="title-page-author">${book.author}</div>
+          <div class="title-page-date">QUASSUS SMP — BIBLIOTECA</div>
+        </div>`;
+
+      rightContent.innerHTML = `
+        <div class="blank-page-right">
+          <div class="blank-flourish">❧</div>
+        </div>`;
+    } else {
+      // Content spread — left page = odd index, right = even
+      const leftIdx  = (readerSpread - 1) * 2;       // 0-based paragraph index
+      const rightIdx = leftIdx + 1;
+      const leftPageNum  = leftIdx + 1;               // display page numbers
+      const rightPageNum = leftIdx + 2;
+
+      runLeft.textContent  = title.toUpperCase();
+      runRight.textContent = 'QUASSUS SMP';
+
+      // Left page text
+      if (leftIdx < readerPages.length) {
+        const isFirst = leftIdx === 0;
+        leftContent.innerHTML = `<p class="page-body-text${isFirst ? ' drop-cap' : ''}">${readerPages[leftIdx]}</p>`;
+        pnumLeft.textContent = leftPageNum;
+      } else {
+        leftContent.innerHTML = '';
+        pnumLeft.textContent = '';
+      }
+
+      // Right page text
+      if (rightIdx < readerPages.length) {
+        rightContent.innerHTML = `<p class="page-body-text">${readerPages[rightIdx]}</p>`;
+        pnumRight.textContent = rightPageNum;
+      } else {
+        rightContent.innerHTML = `<div class="blank-page-right"><div class="blank-flourish">— finis —</div></div>`;
+        pnumRight.textContent = '';
+      }
+    }
+
+    // Nav buttons
+    document.getElementById('btn-prev').disabled = readerSpread === 0;
+    document.getElementById('btn-next').disabled = readerSpread >= totalSpreads - 1;
+  }
+
+  if (animate) {
+    const leftEl  = document.getElementById('page-left');
+    const rightEl = document.getElementById('page-right');
+    leftEl.classList.add('flip-out');
+    rightEl.classList.add('flip-out');
+    setTimeout(() => {
+      leftEl.classList.remove('flip-out');
+      rightEl.classList.remove('flip-out');
+      doRender();
+      leftEl.classList.add('flip-in');
+      rightEl.classList.add('flip-in');
+      setTimeout(() => {
+        leftEl.classList.remove('flip-in');
+        rightEl.classList.remove('flip-in');
+      }, 220);
+    }, 220);
+  } else {
+    doRender();
+  }
+}
+
+function turnPage(dir) {
+  const lang = currentLang;
+  const totalSpreads = 1 + Math.ceil(readerPages.length / 2);
+  const newSpread = readerSpread + dir;
+  if (newSpread < 0 || newSpread >= totalSpreads) return;
+  readerSpread = newSpread;
+  renderSpread(true);
+}
+
+function updatePageCounter() {
+  // no-op: kept for compatibility with setLang call
+}
+
+function closeReader() {
+  document.getElementById('reader').classList.remove('open');
+}
+
+document.getElementById('reader').addEventListener('click', function(e) {
+  if (e.target === this) closeReader();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeReader();
+  if (e.key === 'ArrowRight') turnPage(1);
+  if (e.key === 'ArrowLeft') turnPage(-1);
+});
+
+/* ════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), 3400);
+}
+
+/* ════════════════════════════════════════════
+   ROMAN NUMERALS
+════════════════════════════════════════════ */
+function toRoman(n) {
+  const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let out = '';
+  vals.forEach((v,i) => { while(n>=v){ out+=syms[i]; n-=v; } });
+  return out;
+}
+
+/* ════════════════════════════════════════════
+   SPACE BACKGROUND — stars + shooting stars
+════════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('space-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Static stars
+  const stars = Array.from({length: 280}, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    r: Math.random() * 1.4 + 0.2,
+    a: Math.random() * 0.7 + 0.3,
+    twinkleSpeed: Math.random() * 0.02 + 0.005,
+    twinklePhase: Math.random() * Math.PI * 2,
+  }));
+
+  // Nebula clouds (static, draw once-ish)
+  const nebulae = [
+    { x: 0.15, y: 0.25, rx: 220, ry: 140, color: 'rgba(100,10,20,0.055)' },
+    { x: 0.75, y: 0.6,  rx: 180, ry: 120, color: 'rgba(10,20,80,0.05)' },
+    { x: 0.5,  y: 0.85, rx: 300, ry: 100, color: 'rgba(60,10,60,0.04)' },
+  ];
+
+  // Shooting stars
+  class ShootingStar {
+    constructor() { this.reset(true); }
+    reset(initial = false) {
+      this.x = Math.random() * canvas.width;
+      this.y = initial ? Math.random() * canvas.height : -10;
+      const angle = (Math.random() * 20 + 20) * Math.PI / 180;
+      const speed = Math.random() * 5 + 3;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.len = Math.random() * 80 + 40;
+      this.alpha = 0;
+      this.maxAlpha = Math.random() * 0.7 + 0.3;
+      this.life = 0;
+      this.maxLife = Math.random() * 60 + 40;
+      this.delay = initial ? Math.random() * 300 : Math.random() * 200 + 50;
+    }
+    update() {
+      if (this.delay > 0) { this.delay--; return; }
+      this.life++;
+      const t = this.life / this.maxLife;
+      this.alpha = t < 0.2 ? (t/0.2)*this.maxAlpha : t > 0.7 ? ((1-t)/0.3)*this.maxAlpha : this.maxAlpha;
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.life >= this.maxLife || this.x > canvas.width + 100 || this.y > canvas.height + 100) {
+        this.reset();
+      }
+    }
+    draw(ctx) {
+      if (this.delay > 0 || this.alpha <= 0) return;
+      ctx.save();
+      const tailX = this.x - this.vx * (this.len / Math.hypot(this.vx, this.vy));
+      const tailY = this.y - this.vy * (this.len / Math.hypot(this.vx, this.vy));
+      const grad = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
+      grad.addColorStop(0, `rgba(255,200,220,0)`);
+      grad.addColorStop(0.7, `rgba(255,220,235,${this.alpha * 0.5})`);
+      grad.addColorStop(1, `rgba(255,255,255,${this.alpha})`);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(this.x, this.y);
+      ctx.stroke();
+      // Head glow
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${this.alpha})`;
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  const shootingStars = Array.from({length: 6}, () => new ShootingStar());
+  let frame = 0;
+
+  function draw() {
+    frame++;
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    // Deep space gradient
+    const bg = ctx.createRadialGradient(W*0.5, H*0.4, 0, W*0.5, H*0.4, Math.max(W,H)*0.75);
+    bg.addColorStop(0, '#08041a');
+    bg.addColorStop(0.4, '#04020e');
+    bg.addColorStop(1, '#000008');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Nebulae
+    nebulae.forEach(n => {
+      const grd = ctx.createRadialGradient(n.x*W, n.y*H, 0, n.x*W, n.y*H, n.rx);
+      grd.addColorStop(0, n.color);
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.save();
+      ctx.scale(1, n.ry/n.rx);
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(n.x*W, n.y*H*(n.rx/n.ry), n.rx, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // Stars
+    stars.forEach(s => {
+      const twinkle = Math.sin(frame * s.twinkleSpeed + s.twinklePhase) * 0.3 + 0.7;
+      ctx.beginPath();
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,240,250,${s.a * twinkle})`;
+      ctx.fill();
+    });
+
+    // Shooting stars
+    shootingStars.forEach(ss => { ss.update(); ss.draw(ctx); });
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+renderShelf();
+</script>
+</body>
+</html>
